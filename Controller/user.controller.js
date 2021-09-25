@@ -11,7 +11,7 @@ const { body,validationResult} = require('express-validator')
 const User = require('../model/user.model');
 const Appointment = require("../model/Appointment.model")
 const Salon = require('../model/salon.model');
-
+const Profile = require ("../model/Profile.model")
 
 
 
@@ -206,7 +206,21 @@ const userAppointments = async (req,res)=>{
     }
 }
 
+const getNearBySalons = async (req,res) => {
+    let userLocation = req.body.location
+    try {
+        let findSalons = Profile.find({location: {$nearby: {$geometry: {type:"Point", coordinates: [userLocation[0], userLocation[1]] },maxDistance:4000,}}})
+        res.status(200).json(findSalons)
+    }
+    catch(err){
+        res.status(500).send("Server Error")
+    }
+}
 
+
+const getSalons = async (req, res)=>{
+
+}
 
 module.exports ={
     validateData,
@@ -214,5 +228,6 @@ module.exports ={
     loginUser,
     signupUser,
     booking,
-    userAppointments
+    userAppointments,
+    getNearBySalons
 }

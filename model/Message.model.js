@@ -17,4 +17,4 @@ const messageSchema = mongoose.Schema({
     {timeStamp: true}
 )
 
-module.export = mongoose.Schema('message', messageSchema)
+module.exports = mongoose.Schema('message', messageSchema)

@@ -27,5 +27,7 @@ const salonSchema = new mongoose.Schema ({
     }],
 },{ strict: false })
 
+
+
 module.exports= Salon = mongoose.model('salon', salonSchema)
 

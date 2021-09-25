@@ -29,8 +29,7 @@ const Appointments = new Schema({
     }],
     
     status: {
-        type: Boolean,
-        default:false
+        type:String
     },
     appointment_date: {
         type: Date,

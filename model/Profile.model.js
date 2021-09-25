@@ -24,6 +24,9 @@ const profileSchema = new moongose.Schema({
             
         }
     },
+    services:{
+        type:[]
+    },
     location: {
         type: {
           type: String, // Don't do `{ location: { type: String } }`
@@ -40,7 +43,7 @@ const profileSchema = new moongose.Schema({
         type: String,
     },
     image:{
-        type:Buffer,
+        type:String,
     },
     time:{
       type:[String]
@@ -50,5 +53,7 @@ const profileSchema = new moongose.Schema({
         default: Date.now
     }
 })
+
+profileSchema.index({ location: "2dsphere" });
 
 module.exports= Profile =moongose.model('profile', profileSchema)

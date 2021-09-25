@@ -1,4 +1,7 @@
 {
     "mongoURI":"mongodb+srv://Haris:5337618@cluster0.uqzho.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-    "jwtsecret":"mysecret"
+    "jwtsecret":"mysecret",
+    "CLOUDINARY_NAME":"dmc7u2fui",
+    "CLOUDINARY_API":"929714254323319",
+    "CLOUDINARY_SECRET":"hBgwu6p69M3aDJIhQJGqLn3nk4c"
 }

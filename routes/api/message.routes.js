@@ -1,22 +1,11 @@
 const router = require('express').Router()
 const Message = require('../../model/Message.model')
+const messageController = require ("../../Controller/message.controller")
 
 
-router.post("/sendMessage", async (req,res)=> {
-    const newMessage = new Message ({
-
-    })
-
-    try {
-        const saved = await newMessage.save()
-        res.status(200).json(saved)
-    }
-    catch(err){
-        res.status(500).json("server error")
-    }
-})
+router.post("/sendMessage", messageController.sendMessage)
 
 
-router.get("/getMessage", async (req,res)=>{
-    
-} )
+router.get("/getMessage", messageController.getMessage)
+
+module.exports=router
