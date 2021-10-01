@@ -60,12 +60,13 @@ const getAuth = async (req,res,next) => {
 
 const loginUser = async (req,res,next)=>{
     try{
+        console.log(req.body)
         const errors = validationResult(req); // Finds the validation errors in this request and wraps them in an object with handy functions
-
-        if (!errors.isEmpty()) {
-            res.status(422).json({ errors: errors.array() });
-            return
-        }
+        console.log(errors)
+        // if (!errors.isEmpty()) {
+        //     res.status(422).json({ errors: errors.array() });
+        //     return
+        // }
 
         const {email, password}=req.body;
         let user = await User.findOne({email});
@@ -207,19 +208,27 @@ const userAppointments = async (req,res)=>{
 }
 
 const getNearBySalons = async (req,res) => {
-    let userLocation = req.body.location
     try {
-        let findSalons = Profile.find({location: {$nearby: {$geometry: {type:"Point", coordinates: [userLocation[0], userLocation[1]] },maxDistance:4000,}}})
-        res.status(200).json(findSalons)
+        let findSalons = await Profile.find({"location": {$near: {$geometry: {type:"Point", coordinates: [33.6254994,73.0616463] }, $minDistance: 0, 
+        $maxDistance: 1000 }}})
+        console.log(findSalons)
+        res.status(200).json("Hello")
     }
     catch(err){
+        console.log(err)
         res.status(500).send("Server Error")
     }
 }
 
 
 const getSalons = async (req, res)=>{
-
+    try {
+        let salons = await Profile.find({"address.city": "RAWALPINDI"})
+        res.status(200).json(salons)
+    }
+    catch(err){
+        res.status(500).send("Server Error")
+    }
 }
 
 module.exports ={
@@ -229,5 +238,8 @@ module.exports ={
     signupUser,
     booking,
     userAppointments,
-    getNearBySalons
+    getNearBySalons,
+    getSalons 
 }
+
+

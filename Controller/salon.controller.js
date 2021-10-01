@@ -239,18 +239,19 @@ const profile = async (req,res)=> {
     if(!errors.isEmpty()){
         return res.status(400).json({errors: errors.array()})
     }
-
+    console.log(body)
     const {name , number , address, location, description, image , time, services} =req.body
     const profileField = {}
     profileField.user=req.user.id
     if(name) profileField.name=name 
-    if(description) profileField.description=description
     if(number) profileField.number=number
     if(address) profileField.address= address 
+    if(services) profileField.services=services
     if(location) profileField.location=location
+    if(description) profileField.description=description
     if(image) profileField.image=image
     if(time) profileField.time=time
-    if(services) profileField.services=services
+    
     console.log(req.user)
     
     try {
@@ -398,6 +399,31 @@ const checkingCheckout=async (req,res)=>{
     }
   }
 
+  const markAsAccepted = async (req,res) =>{
+    try{
+        let appointmentId = req.body.appointmentId;
+        let updateAppointment = await Appointment.findOneAndUpdate({_id:appointmentId},{$set: { status:"accepted"}}, {new: true, useFindAndModify: false})
+        console.log(updateAppointment)
+        res.status(200).json(updateAppointment)
+    }
+    catch(err){
+        res.status(500).json(err);
+    }
+  }
+
+
+  const markAsCancelled = async (req,res) =>{
+    try{
+        let appointmentId = req.body.appointmentId;
+        let updateAppointment = await Appointment.findOneAndUpdate({_id:appointmentId},{$set: { status:"cancelled"}}, {new: true, useFindAndModify: false})
+        console.log(updateAppointment)
+        res.status(200).json(updateAppointment)
+    }
+    catch(err){
+        res.status(500).json(err);
+    }
+  }
+
 
 module.exports={
     getAuth,
@@ -412,6 +438,7 @@ module.exports={
     checkingCheckout,
     customerPortal,
     setAppointmentTime,
-    markAsComplete
-
+    markAsComplete,
+    markAsAccepted,
+    markAsCancelled,
 }

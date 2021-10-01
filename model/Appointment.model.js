@@ -29,11 +29,12 @@ const Appointments = new Schema({
     }],
     
     status: {
-        type:String
+        type:String,
+        default:"pending"
     },
     appointment_date: {
         type: Date,
-        default: Date.now
+        
     },
     paymentStatus:{
         type: String,

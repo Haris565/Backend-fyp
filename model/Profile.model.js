@@ -36,8 +36,10 @@ const profileSchema = new moongose.Schema({
         coordinates: {
           type: [Number],
         //   required: true
-        }
+        },
+        
     },
+    
 
     description:{ 
         type: String,
@@ -54,6 +56,6 @@ const profileSchema = new moongose.Schema({
     }
 })
 
-profileSchema.index({ location: "2dsphere" });
+profileSchema.index({location: '2dsphere' });
 
-module.exports= Profile =moongose.model('profile', profileSchema)
+module.exports= Profile = moongose.model('profile', profileSchema)
