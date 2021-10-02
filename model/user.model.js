@@ -26,6 +26,11 @@ const userSchema = new mongoose.Schema ({
         ref:'Appointments',
         
     }],
+    favorites:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'profile',
+        
+    }],
     date:{
         type: Date,
         default: Date.now

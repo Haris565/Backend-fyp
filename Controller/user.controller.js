@@ -155,35 +155,39 @@ const signupUser = async (req,res) =>{
 
 const booking = async (req,res)=>{
     try{
-        const {salon_id, start_time, services} =req.body;
+        const {salon_id, appointment_date, services} =req.body;
+        console.log("salon_id", salon_id)
         const customer_id = req.user.id
+        console.log("customer_id", customer_id)
         const appointment = new Appointment({
-            customer_id, salon_id, start_time, services
+            customer_id, salon_id, appointment_date, services
         })
         let booking = await appointment.save()
-        res.json(booking)
+        console.log("booking", booking)
         console.log(booking._id)
         if(booking){
             let user = await User.findById(req.user.id)
+            console.log("user", user)
             if(user){
                 let appointmentsByUser = user.appointment
                 appointmentsByUser=[...appointmentsByUser, booking._id]
                 console.log(appointmentsByUser)
                 const updated= await User.updateOne({_id:req.user.id},{appointment:appointmentsByUser})
-                console.log(updated)
+                console.log("updated user", updated)
             }
         
-            let salon = await Salon.findById(req.body.salon_id)
-            console.log(salon)
+            let salon = await Salon.findById(salon_id)
+            console.log("salon",salon)
             if(salon){
                 let appointmentsforSalon = salon.appointment
                 appointmentsforSalon=[...appointmentsforSalon, booking._id]
                 console.log(appointmentsforSalon)
                 const updated= await Salon.updateOne({_id:req.body.salon_id},{appointment:appointmentsforSalon})
-                console.log(updated)
+                console.log("updated salon", updated)
             }
             
         }
+        res.status(200).json("Booking done")
 
     }
     catch(err){
@@ -197,13 +201,65 @@ const booking = async (req,res)=>{
 //@desc see all appointments booked for Register salon
 
 const userAppointments = async (req,res)=>{
+    // console.log(req.user.id)
     try {
-        let allAppointments = await Appointment.find({customer_id:req.user.id})
+        let allAppointments = await Appointment.find({customer_id:"6150852910817252c0386c69"}).populate('salon_id').populate("customer_id")
         res.json(allAppointments)
         console.log(allAppointments)
     }
     catch (err){
         res.status(500).send("Server Error")
+        console.log(err)
+    }
+}
+
+
+const addToFavorite = async (req,res) =>{
+    try {
+        console.log(req.body)
+        const {userId, profileId} = req.body
+        // let ifExist = await User.find({_id:userId}, {favorites: {$in:[profileId]}})
+        let userFind = await User.findOne({_id:userId})
+        // let ifExist = User.find({favorites: {$in:[32]}})
+        // console.log("if exist", ifExist)
+        if(userFind){
+            console.log(userFind.favorites)
+            let isExist = userFind.favorites.includes(profileId)
+            if(isExist){
+                let user = await User.updateOne({_id:userId}, {$pull: {favorites: profileId}},{new: true }).exec();
+                console.log(user)
+                return res.json(user)
+            }
+            else {
+                let user = await User.updateOne({_id:userId}, {$push: {favorites: profileId}},{new: true }).exec();
+                console.log(user)
+                return res.json(user)
+            }
+        }
+        else {
+            return res.status(400).json({msg:"no such user exist"})
+        }
+     
+        // let user = await User.find({"id":userId})
+
+    }
+    catch(err){
+        res.status(500).send("Server Error")
+        console.log(err)
+    }
+}
+
+const getFavorites = async (req, res) =>{
+    try{
+        let userId = req.user.id
+        console.log(userId)
+        let findFav = await User.findOne({_id:userId}).populate("favorites")
+        console.log(findFav)
+        res.status(200).json(findFav);
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).send("server error")
     }
 }
 
@@ -239,7 +295,9 @@ module.exports ={
     booking,
     userAppointments,
     getNearBySalons,
-    getSalons 
+    getSalons,
+    addToFavorite,
+    getFavorites
 }
 
 

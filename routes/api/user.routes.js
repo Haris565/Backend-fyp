@@ -7,9 +7,10 @@ router.get("/",auth, userController.getAuth)
 router.post("/login", userController.validateData("loginUser"), userController.loginUser )
 router.post("/register", userController.signupUser)
 router.post("/booking", auth, userController.booking)
-router.get("/userAppointments", userController.userAppointments)
+router.post("/addToFavorite", userController.addToFavorite)
+router.get("/userAppointments",auth, userController.userAppointments)
 router.get("/getSalons", userController.getSalons)
 router.get("/getNearBySalons", userController.getNearBySalons)
-
+router.get("/getFavorites", auth, userController.getFavorites)
 
 module.exports=router;

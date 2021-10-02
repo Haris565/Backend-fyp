@@ -7,7 +7,6 @@ const profileSchema = new moongose.Schema({
     },
     name:{
         type:String,
-        
     },
 
     number:{
