@@ -4,6 +4,8 @@ const salonController = require ("../../Controller/salon.controller")
 
 
 router.get("/", auth , salonController.getAuth)
+router.get("/getAllAppointments", salonController.getAllAppointments);
+router.get("/getCounts", salonController.getCounts);
 router.post("/login", salonController.validateData("loginSalon"), salonController.salonLogin)
 router.post("/signup", salonController.validateData("signupSalon"), salonController.salonSignup),
 router.post("/setProfile", auth, salonController.profile),

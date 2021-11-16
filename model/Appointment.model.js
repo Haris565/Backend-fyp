@@ -19,17 +19,14 @@ const Appointments = new Schema({
         type: String,
         
     },
-    services: [{
-        name:{
-            type:String
-        },
-        price:{
-            type:String
+    services: [
+        {
         }
-    }],
+    ],
     status: {
         type:String,
-        default:"pending"
+        default:"pending",
+        enum:['accepted', "rejected", "completed", "pending"]
     },
     appointment_date: {
         type: Date,

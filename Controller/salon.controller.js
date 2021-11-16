@@ -6,7 +6,7 @@ const config = require ('config');
 const crypto = require('crypto')
 const nodemailer = require ("nodemailer")
 const {cloudinary} = require("../middleware/cloudinary")
-
+const mongoose = require("mongoose");
 
 const transport= nodemailer.createTransport({
     service: 'gmail',
@@ -424,6 +424,39 @@ const checkingCheckout=async (req,res)=>{
     }
   }
 
+  const getAllAppointments = async (req,res) => {
+        try {
+            let appointments = await Appointment.find().populate("customer_id");
+            console.log(appointments)
+            res.status(200).json(appointments)
+        }
+        catch(err){
+            res.status(500).json(err);
+        }
+  }
+
+
+  const getCounts = async (req,res)=>{
+      try{
+        let count = await Appointment.aggregate([
+            // // {$match:{status:'pending'}},
+            {$match:{salon_id:new mongoose.Types.ObjectId("6151c9ffa7928e2934748e40")}},
+            // {$group:{_id: {state: "$services.price"}, total:{$sum:1}}}
+
+            {$group:{_id: "$status", total:{$sum:1}}}
+        ])
+        // let count = await Appointment.aggregate([
+        //     {$match:{salon_id:ObjectId("6151c9ffa7928e2934748e40")}},
+        //     {$group:{_id: {state: "$status"}, total:{$sum:1}}}
+        // ])
+        console.log(count)
+        res.status(200).json(count)
+      }
+      catch(err){
+        res.status(500).json(err);
+    }
+  }
+
 
 module.exports={
     getAuth,
@@ -441,4 +474,6 @@ module.exports={
     markAsComplete,
     markAsAccepted,
     markAsCancelled,
+    getAllAppointments,
+    getCounts
 }

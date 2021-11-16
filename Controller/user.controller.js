@@ -20,16 +20,16 @@ const validateData = (method) => {
   switch (method) {
     case 'signupUser': {
      return [ 
-        body('name', 'name is required ').isEmpty(),
+        body('name', 'name is required ').exists(),
         body('email', 'Please include a valid email').isEmail(),
         body('password', 'Please enter password with 6 or more character').isLength({min:6}),
-        body('number', 'Please enter a valid number').isLength({min:11})
+        body('phone', 'Please enter a valid number').isLength({min:11})
        ]   
     }
 
     case 'loginUser': {
         return [ 
-           body('email', 'Invalid email').exists().isEmail(),
+           body('email', 'Invalid email').isEmail(),
            body('password', "Password is required").exists()
           ]   
        }
@@ -63,21 +63,23 @@ const loginUser = async (req,res,next)=>{
         console.log(req.body)
         const errors = validationResult(req); // Finds the validation errors in this request and wraps them in an object with handy functions
         console.log(errors)
-        // if (!errors.isEmpty()) {
-        //     res.status(422).json({ errors: errors.array() });
-        //     return
-        // }
+        if (!errors.isEmpty()) {
+            res.status(422).json({ errors: errors.array() });
+            return
+        }
 
         const {email, password}=req.body;
         let user = await User.findOne({email});
-        console.log(user);
+        console.log("user", user);
         if(!user){
-            return res.status(400).json ({error : [{msg:"Invalid credentials"}]})
+            
+            res.status(422).json({errors : [{msg:"Invalid credentials"}]})
+            return
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if(!isMatch){
-            return res.status(400).json ({error : [{msg:"Invalid credentials"}]})
+            return res.status(400).json ({errors : [{msg:"Invalid credentials"}]})
         }
 
         const payload = {
@@ -105,7 +107,8 @@ const loginUser = async (req,res,next)=>{
 
 const signupUser = async (req,res) =>{
     try{
-        const errors = validationResult(req)
+        const errors =  validationResult(req);
+        console.log(errors)
         if (!errors.isEmpty()){
             res.status(400).json({errors: errors.array()});
             return
@@ -157,6 +160,7 @@ const booking = async (req,res)=>{
     try{
         const {salon_id, appointment_date, services} =req.body;
         console.log("salon_id", salon_id)
+        console.log("services", services)
         const customer_id = req.user.id
         console.log("customer_id", customer_id)
         const appointment = new Appointment({
@@ -201,9 +205,9 @@ const booking = async (req,res)=>{
 //@desc see all appointments booked for Register salon
 
 const userAppointments = async (req,res)=>{
-    // console.log(req.user.id)
+    console.log(req.user.id)
     try {
-        let allAppointments = await Appointment.find({customer_id:"6150852910817252c0386c69"}).populate('salon_id').populate("customer_id")
+        let allAppointments = await Appointment.find({customer_id:req.user.id, status:"accepted", appointment_date: {$gte: new Date().toISOString()} }).populate('salon_id').populate("customer_id")
         res.json(allAppointments)
         console.log(allAppointments)
     }
@@ -214,6 +218,19 @@ const userAppointments = async (req,res)=>{
 }
 
 
+const userPreviousAppointments = async (req,res)=>{
+    console.log(req.user.id)
+    try {
+        let allAppointments = await Appointment.find({customer_id:req.user.id, status:"accepted", appointment_date: {$lte: new Date().toISOString()} }).populate('salon_id').populate("customer_id")
+        res.json(allAppointments)
+        console.log(allAppointments)
+    }
+    catch (err){
+        res.status(500).send("Server Error")
+        console.log(err)
+    }
+}
+
 const addToFavorite = async (req,res) =>{
     try {
         console.log(req.body)
@@ -221,16 +238,17 @@ const addToFavorite = async (req,res) =>{
         // let ifExist = await User.find({_id:userId}, {favorites: {$in:[profileId]}})
         let userFind = await User.findOne({_id:userId})
         // let ifExist = User.find({favorites: {$in:[32]}})
-        // console.log("if exist", ifExist)
         if(userFind){
             console.log(userFind.favorites)
             let isExist = userFind.favorites.includes(profileId)
+            
             if(isExist){
                 let user = await User.updateOne({_id:userId}, {$pull: {favorites: profileId}},{new: true }).exec();
                 console.log(user)
                 return res.json(user)
             }
             else {
+                
                 let user = await User.updateOne({_id:userId}, {$push: {favorites: profileId}},{new: true }).exec();
                 console.log(user)
                 return res.json(user)
@@ -266,9 +284,9 @@ const getFavorites = async (req, res) =>{
 const getNearBySalons = async (req,res) => {
     try {
         let findSalons = await Profile.find({"location": {$near: {$geometry: {type:"Point", coordinates: [33.6254994,73.0616463] }, $minDistance: 0, 
-        $maxDistance: 1000 }}})
+        $maxDistance: 6000 }}})
         console.log(findSalons)
-        res.status(200).json("Hello")
+        res.status(200).json(findSalons)
     }
     catch(err){
         console.log(err)
@@ -297,7 +315,8 @@ module.exports ={
     getNearBySalons,
     getSalons,
     addToFavorite,
-    getFavorites
+    getFavorites,
+    userPreviousAppointments,
 }
 
 
