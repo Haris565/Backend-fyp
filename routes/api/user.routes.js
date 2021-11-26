@@ -13,5 +13,6 @@ router.get("/userPreviousAppointments",auth, userController.userPreviousAppointm
 router.get("/getSalons", userController.getSalons)
 router.get("/getNearBySalons", userController.getNearBySalons)
 router.get("/getFavorites", auth, userController.getFavorites)
-
+router.get("/getReview/:profile_id", userController.getReview)
+router.post("/addReview", auth, userController.addReview)
 module.exports=router;

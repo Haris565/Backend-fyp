@@ -12,6 +12,7 @@ const User = require('../model/user.model');
 const Appointment = require("../model/Appointment.model")
 const Salon = require('../model/salon.model');
 const Profile = require ("../model/Profile.model")
+const Review = require("../model/review.model")
 
 
 
@@ -158,13 +159,13 @@ const signupUser = async (req,res) =>{
 
 const booking = async (req,res)=>{
     try{
-        const {salon_id, appointment_date, services} =req.body;
+        const {salon_id, salon_profile, appointment_date, services} =req.body;
         console.log("salon_id", salon_id)
         console.log("services", services)
         const customer_id = req.user.id
         console.log("customer_id", customer_id)
         const appointment = new Appointment({
-            customer_id, salon_id, appointment_date, services
+            customer_id, salon_id, appointment_date, services, profile_id:salon_profile
         })
         let booking = await appointment.save()
         console.log("booking", booking)
@@ -205,11 +206,12 @@ const booking = async (req,res)=>{
 //@desc see all appointments booked for Register salon
 
 const userAppointments = async (req,res)=>{
-    console.log(req.user.id)
+    console.log("user_id",req.user.id)
     try {
-        let allAppointments = await Appointment.find({customer_id:req.user.id, status:"accepted", appointment_date: {$gte: new Date().toISOString()} }).populate('salon_id').populate("customer_id")
+        let allAppointments = await Appointment.find({customer_id:req.user.id, appointment_date: {$gte: new Date().toISOString()} }).populate('salon_id').populate("customer_id").populate("profile_id")
+        let salon_id = allAppointments
         res.json(allAppointments)
-        console.log(allAppointments)
+        console.log(salon_id)
     }
     catch (err){
         res.status(500).send("Server Error")
@@ -221,9 +223,10 @@ const userAppointments = async (req,res)=>{
 const userPreviousAppointments = async (req,res)=>{
     console.log(req.user.id)
     try {
-        let allAppointments = await Appointment.find({customer_id:req.user.id, status:"accepted", appointment_date: {$lte: new Date().toISOString()} }).populate('salon_id').populate("customer_id")
+        let allAppointments = await Appointment.find({customer_id:req.user.id, appointment_date: {$lte: new Date().toISOString()} }).populate('salon_id').populate("customer_id").populate("profile_id")
+        let salon_id = allAppointments
         res.json(allAppointments)
-        console.log(allAppointments)
+        console.log(salon_id)
     }
     catch (err){
         res.status(500).send("Server Error")
@@ -305,6 +308,37 @@ const getSalons = async (req, res)=>{
     }
 }
 
+
+const addReview = async (req,res) =>{
+    let user_id = req.user.id
+    const {profile_id, review, rating} = req.body
+    try {
+        let createReview = new Review ({
+            profile_id, user_id, review, rating 
+        })
+        let newReview = await createReview.save()
+        res.status(200).json(newReview)
+    } 
+    catch(err){
+        res.status(500).send("Server Error")
+    }
+}
+
+const getReview = async (req,res) => {
+    const profile_id = req.params.profile_id
+    console.log("profile_id", profile_id)
+    try {
+       
+        let reviews = await Review.find({"profile_id":profile_id}).populate("user_id")
+        console.log(reviews)
+        res.status(200).json(reviews)
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).send("Server Error")
+    }
+}
+
 module.exports ={
     validateData,
     getAuth,
@@ -317,6 +351,8 @@ module.exports ={
     addToFavorite,
     getFavorites,
     userPreviousAppointments,
+    addReview,
+    getReview,
 }
 
 

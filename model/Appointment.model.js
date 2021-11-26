@@ -11,6 +11,10 @@ const Appointments = new Schema({
         ref:"user",
         required: true
     },
+    profile_id:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'profile',
+    },
     start_time: {
         type: String,
         
@@ -35,7 +39,11 @@ const Appointments = new Schema({
     paymentStatus:{
         type: String,
         
-    } 
+    },
+    isReviewed:{
+        type:Boolean,
+        default:false
+    },
 },
     {
         timestamps: true,

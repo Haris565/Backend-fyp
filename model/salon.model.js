@@ -21,6 +21,7 @@ const salonSchema = new mongoose.Schema ({
         type:Boolean,
         default:false
     },
+
     appointment:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Appointments',
