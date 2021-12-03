@@ -311,13 +311,30 @@ const getSalons = async (req, res)=>{
 
 const addReview = async (req,res) =>{
     let user_id = req.user.id
-    const {profile_id, review, rating} = req.body
+    const {profile_id, review, rating, appointment_id} = req.body
+    console.log("body",req.body)
     try {
         let createReview = new Review ({
             profile_id, user_id, review, rating 
         })
         let newReview = await createReview.save()
-        res.status(200).json(newReview)
+
+        if(newReview){
+            console.log("into the if")
+            let updateAppointment =await Appointment.updateOne({_id:appointment_id}, {
+                $set: {
+                    isReviewed: true
+                }
+            })
+           
+            console.log(updateAppointment)
+            res.status(200).json(newReview)
+        }
+        else {
+            res.status(404).send("Unable to perfome this action")
+        }
+     
+       
     } 
     catch(err){
         res.status(500).send("Server Error")

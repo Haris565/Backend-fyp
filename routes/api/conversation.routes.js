@@ -5,7 +5,7 @@ const auth = require("../../middleware/auth")
 //route GET api/conversation
 //@desc new user conversation
 
-router.post("/createConversation" ,conversationController.createConversation )
-router.get("/userConversation", conversationController.getUserConversation )
+router.post("/createConversation" , auth ,conversationController.createConversation )
+router.get("/userConversation",auth, conversationController.getUserConversation )
 
 module.exports = router

@@ -16,7 +16,7 @@ const sendMessage = async (req,res)=> {
 
 const getMessage = async (req,res)=>{
     try{
-        let messages = await Message.find({conversationId: req.body.conversationId})
+        let messages = await Message.find({conversationId: req.params.conversationId})
         res.status(200).json(messages)
     }
     catch(err){

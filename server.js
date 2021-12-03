@@ -4,6 +4,7 @@ const expressValidator = require('express-validator')
 const cors = require('cors')
 const userRoutes = require("./routes/api/user.routes")
 const salonRoute= require ("./routes/api/salon.routes")
+const messageRoute = require("./routes/api/message.routes")
 
 
 
@@ -21,6 +22,7 @@ app.use(cors())
 
 app.use("/api/user", userRoutes)
 app.use("/api/salon", salonRoute)
+app.use("api/chat", messageRoute)
 
 
 app.get("/success", (req, res) => {

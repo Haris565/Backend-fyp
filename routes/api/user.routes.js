@@ -1,7 +1,8 @@
 const router = require('express').Router();
 const auth = require('../../middleware/auth');
 const userController = require("../../Controller/user.controller")
-
+const conversationController = require("../../Controller/conversation.controller")
+const messageController = require ("../../Controller/message.controller")
 
 router.get("/",auth, userController.getAuth)
 router.post("/login", userController.validateData("loginUser"), userController.loginUser )
@@ -15,4 +16,9 @@ router.get("/getNearBySalons", userController.getNearBySalons)
 router.get("/getFavorites", auth, userController.getFavorites)
 router.get("/getReview/:profile_id", userController.getReview)
 router.post("/addReview", auth, userController.addReview)
+router.post("/createConversation", auth,  conversationController.createConversation)
+router.get("/getConversations",auth, conversationController.getUserConversation )
+router.get("/getMessage/:conversationId", auth, messageController.getMessage)
+router.post("/sendMessage", auth, messageController.sendMessage)
+
 module.exports=router;

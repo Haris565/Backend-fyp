@@ -6,16 +6,26 @@ const Conversation = require("../model/Conversation.model")
 
 const createConversation = async (req, res)=> {
     // let {senderId , receiverId} = req.body;
-
-    const newConversation = new Conversation ({
-        members: [req.body.senderId, req.body.receiverId]
-    })
-
+    console.log(req.body.receiverId)
+    console.log(req.user.id )
     try {
+        let senderId = req.user.id
+        let findConversation = await Conversation.findOne({members:[senderId, req.body.receiverId]})
+        console.log(findConversation)
 
-        let createdConversation = await newConversation.save();
-        res.status(200).json(createdConversation);
-
+        if(findConversation){
+            console.log("find")
+            return res.status(200).json(findConversation);
+        }
+        else {
+            const newConversation = new Conversation ({
+                members: [senderId, req.body.receiverId]
+            })
+            let createdConversation = await newConversation.save();
+            return res.status(200).json(createdConversation);
+        }
+       
+        
     }
     catch (err){
         res.status(500).json({msg:"Server Error"})
@@ -28,8 +38,8 @@ const createConversation = async (req, res)=> {
 const getUserConversation = async (req, res)=> {
     try {
         let conversations = await Conversation.find({
-            members:{$in:[req.body.userId]}
-        })
+            members:{$in:[req.user.id]}
+        }).populate('user').populate("profile")
         res.status(200).json(conversations)
 
     }
