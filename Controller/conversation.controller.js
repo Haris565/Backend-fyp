@@ -39,7 +39,7 @@ const getUserConversation = async (req, res)=> {
     try {
         let conversations = await Conversation.find({
             members:{$in:[req.user.id]}
-        }).populate('user').populate("profile")
+        })
         res.status(200).json(conversations)
 
     }
@@ -47,6 +47,7 @@ const getUserConversation = async (req, res)=> {
         res.status(500).json({msg:"Server Error"})
     }
 }
+
 
 module.exports = {
     getUserConversation,

@@ -20,6 +20,8 @@ const transport= nodemailer.createTransport({
 const Salon = require("../model/salon.model")
 const Profile =require ("../model/Profile.model")
 const Appointment = require("../model/Appointment.model")
+const Conversation = require ("../model/Conversation.model")
+const User = require ("../model/user.model")
 
 const stripe = require("stripe");
 const Stripe = stripe("sk_test_51JVLh7GHsDLdda7ZlaRmaZCC2Uzmn2yXSjDSgUlSwTx7uAUPHfPKNhZ4kY8ntf8iHeGTamUjFpw9gUkANpkm6WgL00wNQ5K8tD", {
@@ -276,7 +278,7 @@ const profile = async (req,res)=> {
         console.log("new profile")
         console.log(newProfile)
         if(newProfile){
-            let salontoUpdate = await Salon.findOneAndUpdate({_id:req.user.id}, {$set: {profileComplete:true}}, {new: true, useFindAndModify: false})
+            let salontoUpdate = await Salon.findOneAndUpdate({_id:req.user.id}, {$set: {profileComplete:true, profileId:newProfile._id}}, {new: true, useFindAndModify: false})
             console.log(salontoUpdate)
            
         }
@@ -425,8 +427,9 @@ const checkingCheckout=async (req,res)=>{
   }
 
   const getAllAppointments = async (req,res) => {
+        let status = req.params.status
         try {
-            let appointments = await Appointment.find().populate("customer_id");
+            let appointments = await Appointment.find({status:status, appointment_date: {$gte: new Date().toISOString()}}).populate("customer_id");
             console.log(appointments)
             res.status(200).json(appointments)
         }
@@ -457,6 +460,33 @@ const checkingCheckout=async (req,res)=>{
     }
   }
 
+  const getSalonConversations =async (req,res) =>{
+    try{
+        console.log("into the controller")
+        let profileId = req.params.profileId
+        let conversations = await Conversation.find({
+            members:{$in:[profileId]}
+        })
+        res.status(200).json(conversations)
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).json(err);
+    }
+  }
+
+  const findChatOtherUser = async (req,res) => {
+      try {
+        let userId = req.params.userId
+        let findUser = await User.findOne({_id: userId})
+        res.status(200).json(findUser)
+
+      }
+      catch(err){
+          console.log(err)
+          res.status(500).json(err);
+      }
+  }
 
 module.exports={
     getAuth,
@@ -475,5 +505,7 @@ module.exports={
     markAsAccepted,
     markAsCancelled,
     getAllAppointments,
-    getCounts
+    getCounts,
+    getSalonConversations,
+    findChatOtherUser
 }

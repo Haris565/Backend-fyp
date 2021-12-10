@@ -27,6 +27,10 @@ const Appointments = new Schema({
         {
         }
     ],
+    total:{
+        type:Number,
+        required:true
+    },
     status: {
         type:String,
         default:"pending",

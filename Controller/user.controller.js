@@ -24,7 +24,7 @@ const validateData = (method) => {
         body('name', 'name is required ').exists(),
         body('email', 'Please include a valid email').isEmail(),
         body('password', 'Please enter password with 6 or more character').isLength({min:6}),
-        body('phone', 'Please enter a valid number').isLength({min:11})
+        body('number', 'Please enter a valid number').isLength({min:11})
        ]   
     }
 
@@ -115,7 +115,7 @@ const signupUser = async (req,res) =>{
             return
         }
         // if user exist 
-        const {name,email,password,number}=req.body
+        const {name,email,password,number, city}=req.body
         let user = await User.findOne({email});
         if (user){
            return res.status(400).json({ errors: [{msg: "email is already register"}]})
@@ -128,6 +128,7 @@ const signupUser = async (req,res) =>{
             email,
             password,
             number,
+            city
         })
 
         const salt = await bcrypt.genSalt(10);
@@ -159,13 +160,13 @@ const signupUser = async (req,res) =>{
 
 const booking = async (req,res)=>{
     try{
-        const {salon_id, salon_profile, appointment_date, services} =req.body;
+        const {salon_id, salon_profile, appointment_date, services,total} =req.body;
         console.log("salon_id", salon_id)
         console.log("services", services)
         const customer_id = req.user.id
         console.log("customer_id", customer_id)
         const appointment = new Appointment({
-            customer_id, salon_id, appointment_date, services, profile_id:salon_profile
+            customer_id, salon_id, appointment_date, services, profile_id:salon_profile, total
         })
         let booking = await appointment.save()
         console.log("booking", booking)
@@ -285,8 +286,11 @@ const getFavorites = async (req, res) =>{
 }
 
 const getNearBySalons = async (req,res) => {
+    let lat = req.query.lat
+    let long = req.query.long
+    console.log("location",Number(lat),long)
     try {
-        let findSalons = await Profile.find({"location": {$near: {$geometry: {type:"Point", coordinates: [33.6254994,73.0616463] }, $minDistance: 0, 
+        let findSalons = await Profile.find({"location": {$near: {$geometry: {type:"Point", coordinates: [Number(lat),Number(long)]}, $minDistance: 0, 
         $maxDistance: 6000 }}})
         console.log(findSalons)
         res.status(200).json(findSalons)
@@ -356,6 +360,217 @@ const getReview = async (req,res) => {
     }
 }
 
+const getChatUserDetail = async (req,res) => {
+    let id = req.params.profileId
+    try {
+        let findProfile = await Profile.findOne({_id:id})
+        res.status(200).json(findProfile)
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).send("Server Error")
+    }
+}
+
+const addServicesForUser = async ( req, res) => {
+    let userId = req.user.id
+    let services = req.body.services
+    console.log(services)
+    try {
+        let updatedUser = await User.updateOne({_id:userId}, {services:services})
+        console.log(updatedUser)
+        res.status(200).json(updatedUser);
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).send("Server Error")
+    }
+}
+
+const updateProfile = async (req, res)=> {
+    const {name,email,number} =req.body
+    const userId = req.user.id
+    try{
+        let updated = await User.updateOne({_id:userId},{$set:{
+            name:name,
+            email:email,
+            number:number
+        }})
+        res.status(200).json(updated)
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).send("Server Error")
+    }
+    
+}
+
+// exports.getAllJobs = async (req, res) => {
+//     const resPerPage = 9; // results per page
+//     const page = req.params.page || 1; // Page
+//     if (req.query.search && req.query.type) {
+//       const search = new RegExp(escapeRegex(req.query.search), "gi");
+//       switch (req.query.type) {
+//         case "title":
+//           try {
+//             const jobs = await Job.find(
+//               { title: search },
+//               {
+//                 title: true,
+//                 skills: true,
+//                 location: true,
+//                 jobType: true,
+//                 salary:true,
+//                 description: true,
+//               }
+//             )
+//               .populate("company", "name")
+//               .skip(resPerPage * page - resPerPage)
+//               .limit(resPerPage);
+//             const numOfJobs = jobs.length;
+//             if(numOfJobs>0){
+//               res.status(200).json({
+//                 Result: jobs,
+//                 currentPage: page,
+//                 pages: Math.ceil(numOfJobs / resPerPage),
+//                 searchVal: `Search: ${req.query.search} & Type: ${req.query.type}`,
+//                 TotalJobs: numOfJobs,
+//               });
+//             }
+//             else{
+//               res.status(200).json({"msg":"No jobs found"})
+//             }
+//           } catch (err) {
+//             console.log(err);
+//             res.status(500).json(err);
+//           }
+//           break;
+//         case "skills":
+//           try {
+//             const jobs = await Job.find(
+//               { skills: search },
+//               {
+//                 title: true,
+//                 skills: true,
+//                 location: true,
+//                 salary:true,
+//                 jobType: true,
+//                 description: true,
+//               }
+//             )
+//               .populate("company", "name")
+//               .skip(resPerPage * page - resPerPage)
+//               .limit(resPerPage);
+//             const numOfJobs = jobs.length;
+  
+//             if (numOfJobs > 0) {
+//               res.status(200).json({
+//                 Result: jobs,
+//                 currentPage: page,
+//                 pages: Math.ceil(numOfJobs / resPerPage),
+//                 searchVal: `Search: ${req.query.search} & Type: ${req.query.type}`,
+//                 TotalJobs: numOfJobs,
+//               });
+//             } else {
+//               res.status(200).json({ msg: "No jobs found" });
+//             }
+//           } catch (err) {
+//             console.log(err);
+//             res.status(500).json(err);
+//           }
+//           break;
+//       }
+//     } else {
+//       try {
+//         const jobs = await Job.find(
+//             {},
+//           {
+//             title: true,
+//             skills: true,
+//             location: true,
+//             jobType: true,
+//             salary:true,
+//             description: true,
+//           }
+//         )
+//           .populate("company", "name")
+//           .skip(resPerPage * page - resPerPage)
+//           .limit(resPerPage);
+//         const numOfJobs = await Job.estimatedDocumentCount();
+  
+//         res.status(200).json({
+//           Result: jobs,
+//           currentPage: page,
+//           pages: Math.ceil(numOfJobs / resPerPage),
+//           TotalJobs: numOfJobs,
+//         });
+  
+//       } catch (err) {
+//           console.log(err)
+//         res.status(500).json(err);
+//       }
+//     }
+//   };
+  
+  const searchSalon = async (req,res) =>{
+    try {
+        let name = req.params.name
+        let type = req.query.type
+        console.log(name,type)
+        if(type==="name") {
+            let findSalons = await Profile.find({
+                name:name
+            })
+            res.status(200).json(findSalons)
+        }
+        if(type==="service"){
+            let findSalons = await Profile.find({
+                "services.service":name
+            })
+            res.status(200).json(findSalons)
+        }
+    
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).send("Server Error")
+    }
+  }
+
+  const cancelBooking = async (req,res) => {
+      try {
+        let {id, userId, salonId}= req.body
+        let deletedBooking = await Appointment.deleteOne({_id:id})
+        if(deletedBooking){
+            let removeFromUser = await User.updateOne({ _id:userId}, {$pull:{appointment:id}})
+            if(removeFromUser){
+                let removeFromSalon = await Salon.updateOne({_id:salonId},{$pull:{appointments:id}})
+                if(removeFromSalon){
+                    res.status(200).json("Appointment Canceled")
+                }
+                else {
+                    res.status(400).json("cant remove")
+                }
+               
+            }
+            else{
+                    res.status(400).json("cant remove")
+            }
+        }
+        else{
+            res.status(400).json("cant delete")
+        }
+      }
+      catch(err){
+        console.log(err)
+        res.status(500).send("Server Error")
+      }
+  }
+  
+//   function escapeRegex(text) {
+//       return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+//   };
+
 module.exports ={
     validateData,
     getAuth,
@@ -370,6 +585,12 @@ module.exports ={
     userPreviousAppointments,
     addReview,
     getReview,
+    getChatUserDetail,
+    addServicesForUser,
+    updateProfile,
+    searchSalon,
+    cancelBooking
+
 }
 
 

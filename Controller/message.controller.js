@@ -1,5 +1,5 @@
 const Message = require("../model/Message.model")
-
+const io = require("../socket")
 
 const sendMessage = async (req,res)=> {
     const newMessage = new Message (req.body)

@@ -18,7 +18,11 @@ router.get("/getReview/:profile_id", userController.getReview)
 router.post("/addReview", auth, userController.addReview)
 router.post("/createConversation", auth,  conversationController.createConversation)
 router.get("/getConversations",auth, conversationController.getUserConversation )
-router.get("/getMessage/:conversationId", auth, messageController.getMessage)
+router.get("/getMessage/:conversationId",  messageController.getMessage)
 router.post("/sendMessage", auth, messageController.sendMessage)
-
+router.get("/getChatUserDetail/:profileId", auth, userController.getChatUserDetail)
+router.post("/addServicesForUser", auth, userController.addServicesForUser)
+router.post("/updateProfile", auth, userController.updateProfile)
+router.get("/searchSalon/:name",  userController.searchSalon)
+router.post("/cancelBooking",  userController.cancelBooking)
 module.exports=router;

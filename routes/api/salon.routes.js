@@ -1,10 +1,12 @@
 const router = require('express').Router()
 const auth = require("../../middleware/auth");
 const salonController = require ("../../Controller/salon.controller")
-
+const conversationController = require("../../Controller/conversation.controller")
 
 router.get("/", auth , salonController.getAuth)
-router.get("/getAllAppointments", salonController.getAllAppointments);
+router.get("/findChatOtherUser/:userId" , salonController.findChatOtherUser)
+router.get("/getAllAppointments/:status", salonController.getAllAppointments);
+router.get("/getSalonConversations/:profileId", salonController.getSalonConversations )
 router.get("/getCounts", salonController.getCounts);
 router.post("/login", salonController.validateData("loginSalon"), salonController.salonLogin)
 router.post("/signup", salonController.validateData("signupSalon"), salonController.salonSignup),
@@ -15,6 +17,7 @@ router.post("/newPassword", salonController.newPassword)
 router.post("/uploader", salonController.uploader)
 router.post('/checkout',salonController.checkingCheckout);
 router.post("/customerPortal", auth, salonController.customerPortal);
+
 router.post( 
     "/webhook",
     async (request, response) => {

@@ -18,9 +18,16 @@ const userSchema = new mongoose.Schema ({
         type:String,
         require: true
     },
+    city:{
+        type:String,
+        require: true
+    },
     profile:{
         type:String,
     },
+    services: [{
+        
+    }],
     appointment:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Appointments',
