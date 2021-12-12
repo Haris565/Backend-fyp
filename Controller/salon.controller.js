@@ -22,6 +22,8 @@ const Profile =require ("../model/Profile.model")
 const Appointment = require("../model/Appointment.model")
 const Conversation = require ("../model/Conversation.model")
 const User = require ("../model/user.model")
+const Review = require("../model/review.model")
+const Checkout = require("../model/checkout.model")
 
 const stripe = require("stripe");
 const Stripe = stripe("sk_test_51JVLh7GHsDLdda7ZlaRmaZCC2Uzmn2yXSjDSgUlSwTx7uAUPHfPKNhZ4kY8ntf8iHeGTamUjFpw9gUkANpkm6WgL00wNQ5K8tD", {
@@ -336,11 +338,11 @@ const checkingCheckout=async (req,res)=>{
           cancel_url: "http://localhost:5000/failed",
         });
 
-        // const checkout = await new Checkout({
-        //   checkoutID: session.id,
-        //   userID: req.USER._id,
-        //   priceID: priceId,
-        // }).save();
+        const checkout = await new Checkout({
+          checkoutID: session.id,
+          userID: req.user.id,
+          priceID: priceId,
+        }).save();
 
         res.status(200).json({ session: session });
       } catch (err) {
@@ -392,6 +394,7 @@ const checkingCheckout=async (req,res)=>{
   const markAsComplete = async (req,res) =>{
     try{
         let appointmentId = req.body.appointmentId;
+        console.log("In to the completed")
         let updateAppointment = await Appointment.findOneAndUpdate({_id:appointmentId},{$set: { status:"completed"}}, {new: true, useFindAndModify: false})
         console.log(updateAppointment)
         res.status(200).json(updateAppointment)
@@ -401,17 +404,17 @@ const checkingCheckout=async (req,res)=>{
     }
   }
 
-  const markAsAccepted = async (req,res) =>{
-    try{
-        let appointmentId = req.body.appointmentId;
-        let updateAppointment = await Appointment.findOneAndUpdate({_id:appointmentId},{$set: { status:"accepted"}}, {new: true, useFindAndModify: false})
-        console.log(updateAppointment)
-        res.status(200).json(updateAppointment)
-    }
-    catch(err){
-        res.status(500).json(err);
-    }
-  }
+//   const markAsAccepted = async (req,res) =>{
+//     try{
+//         let appointmentId = req.body.appointmentId;
+//         let updateAppointment = await Appointment.findOneAndUpdate({_id:appointmentId},{$set: { status:"accepted"}}, {new: true, useFindAndModify: false})
+//         console.log(updateAppointment)
+//         res.status(200).json(updateAppointment)
+//     }
+//     catch(err){
+//         res.status(500).json(err);
+//     }
+//   }
 
 
   const markAsCancelled = async (req,res) =>{
@@ -429,7 +432,7 @@ const checkingCheckout=async (req,res)=>{
   const getAllAppointments = async (req,res) => {
         let status = req.params.status
         try {
-            let appointments = await Appointment.find({status:status, appointment_date: {$gte: new Date().toISOString()}}).populate("customer_id");
+            let appointments = await Appointment.find({salon_id:req.user.id, status:status, appointment_date: {$gte: new Date().toISOString()}}).populate("customer_id");
             console.log(appointments)
             res.status(200).json(appointments)
         }
@@ -440,10 +443,12 @@ const checkingCheckout=async (req,res)=>{
 
 
   const getCounts = async (req,res)=>{
+      console.log(req.user.id)
       try{
         let count = await Appointment.aggregate([
             // // {$match:{status:'pending'}},
-            {$match:{salon_id:new mongoose.Types.ObjectId("6151c9ffa7928e2934748e40")}},
+            {$match:{salon_id:new mongoose.Types.ObjectId(req.user.id)}},
+            
             // {$group:{_id: {state: "$services.price"}, total:{$sum:1}}}
 
             {$group:{_id: "$status", total:{$sum:1}}}
@@ -488,6 +493,98 @@ const checkingCheckout=async (req,res)=>{
       }
   }
 
+  const getDashboardData = async (req,res) => {
+      try {
+        let count = await Appointment.aggregate([
+            // // {$match:{status:'pending'}},
+            {$match:{salon_id:new mongoose.Types.ObjectId(req.user.id)}},
+            
+            // {$group:{_id: {state: "$services.price"}, total:{$sum:1}}}
+
+            {$group:{_id: null, total:{$sum:1}}}
+        ])
+        let total = await Appointment.aggregate([
+            // // {$match:{status:'pending'}},
+            {$match:{salon_id:new mongoose.Types.ObjectId(req.user.id)}},
+            
+
+            {$group:{_id: null, total:{$sum:"$total"}}}
+        ])
+
+        
+        let upComing = await Appointment.find({salon_id:req.user.id, status:"accepted", appointment_date:{$gte: new Date().toISOString()}}).sort( {appointment_date : 1 } ).limit(2).populate("customer_id")
+        let reviews = await Review.find({profile_id: req.params.profileId}).limit(2).populate('user_id')
+        let canceled = await Appointment.find({salon_id:req.user.id, status:"cancelled"})
+        // let count = await Appointment.aggregate([
+        //     {$match:{salon_id:ObjectId("6151c9ffa7928e2934748e40")}},
+        //     {$group:{_id: {state: "$status"}, total:{$sum:1}}}
+        // ])
+        // let reviews = await
+        
+        let cancelRate=0
+        let acceptRate=0
+        if(count.length > 0){
+            cancelRate = (Number(canceled.length)*Number(count[0].total)/100)
+            acceptRate = 100-cancelRate
+        }
+        
+        
+        console.log(cancelRate)
+        res.status(200).json({count, total, upComing, reviews, canceled, cancelRate, acceptRate})
+      }
+      catch(err){
+          console.log(err)
+          res.status(500).json(err);
+      }
+  }
+
+
+  const packageHandler = async (req, res) => {
+    try {
+        let service = req.body.service
+        let price = req.body.price
+        let profileId = req.body.profileId
+        let saved = await Profile.updateOne({_id:profileId}, {$set: {
+            'package.service':service,
+            'package.price': price,
+            'package.status':true
+        }})
+        res.status(200).json(saved)
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).json(err);
+    }
+  }
+
+  const activatePackage = async (req, res) => {
+    try {
+        let profileId = req.body.profileId
+        let saved = await Profile.updateOne({_id:profileId}, {$set: {
+            'package.status':true
+        }})
+        res.status(200).json(saved)
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).json(err);
+    }
+  }
+
+
+  const deactivatePackage = async (req, res) => {
+    try {
+        let profileId = req.body.profileId
+        let saved = await Profile.updateOne({_id:profileId}, {$set: {
+            'package.status':false
+        }})
+        res.status(200).json(saved)
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).json(err);
+    }
+  }
 module.exports={
     getAuth,
     salonLogin,
@@ -502,10 +599,14 @@ module.exports={
     customerPortal,
     setAppointmentTime,
     markAsComplete,
-    markAsAccepted,
+    // markAsAccepted,
     markAsCancelled,
     getAllAppointments,
     getCounts,
     getSalonConversations,
-    findChatOtherUser
+    findChatOtherUser,
+    getDashboardData,
+    packageHandler,
+    activatePackage,
+    deactivatePackage
 }

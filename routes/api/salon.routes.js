@@ -5,9 +5,9 @@ const conversationController = require("../../Controller/conversation.controller
 
 router.get("/", auth , salonController.getAuth)
 router.get("/findChatOtherUser/:userId" , salonController.findChatOtherUser)
-router.get("/getAllAppointments/:status", salonController.getAllAppointments);
+router.get("/getAllAppointments/:status",auth, salonController.getAllAppointments);
 router.get("/getSalonConversations/:profileId", salonController.getSalonConversations )
-router.get("/getCounts", salonController.getCounts);
+router.get("/getCounts",auth, salonController.getCounts);
 router.post("/login", salonController.validateData("loginSalon"), salonController.salonLogin)
 router.post("/signup", salonController.validateData("signupSalon"), salonController.salonSignup),
 router.post("/setProfile", auth, salonController.profile),
@@ -15,8 +15,15 @@ router.get("/getProfile",auth, salonController.getProfile),
 router.post("/resetPassword", salonController.resetPassword)
 router.post("/newPassword", salonController.newPassword)
 router.post("/uploader", salonController.uploader)
-router.post('/checkout',salonController.checkingCheckout);
+router.post('/checkout',auth, salonController.checkingCheckout);
 router.post("/customerPortal", auth, salonController.customerPortal);
+router.post("/setAppointmentTime", auth, salonController.setAppointmentTime);
+router.post("/markAsComplete", auth, salonController.markAsComplete);
+router.post("/markAsCancelled", auth, salonController.markAsCancelled);
+router.post("/packageHandler", salonController.packageHandler );
+router.post("/activatePackage", salonController.activatePackage);
+router.post("/deactivatePackage", salonController.deactivatePackage)
+router.get("/getDashboardData/:profileId" , auth, salonController.getDashboardData)
 
 router.post( 
     "/webhook",

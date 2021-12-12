@@ -25,4 +25,6 @@ router.post("/addServicesForUser", auth, userController.addServicesForUser)
 router.post("/updateProfile", auth, userController.updateProfile)
 router.get("/searchSalon/:name",  userController.searchSalon)
 router.post("/cancelBooking",  userController.cancelBooking)
+router.get("/getRecomendedSalon/:preference",  userController.getRecomendedSalon)
+
 module.exports=router;

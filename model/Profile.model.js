@@ -26,6 +26,17 @@ const profileSchema = new moongose.Schema({
     services:{
         type:[]
     },
+    package:{
+        service:{
+            type:[]
+        },
+        price:{
+            type:String
+        },
+        status:{
+            type: Boolean
+        }
+    },
     location: {
         type: {
           type: String, // Don't do `{ location: { type: String } }`

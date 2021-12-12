@@ -566,6 +566,18 @@ const updateProfile = async (req, res)=> {
         res.status(500).send("Server Error")
       }
   }
+
+
+  const getRecomendedSalon = async (req, res) => {
+    try {
+        let recomended = await Profile.find({category:req.params.preference})
+        res.status(200).json(recomended)
+    }
+    catch(err){
+        console.log(err)
+        res.status(500).send("Server Error")
+    }
+  }
   
 //   function escapeRegex(text) {
 //       return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
@@ -589,7 +601,8 @@ module.exports ={
     addServicesForUser,
     updateProfile,
     searchSalon,
-    cancelBooking
+    cancelBooking,
+    getRecomendedSalon
 
 }
 
