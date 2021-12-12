@@ -21,6 +21,10 @@ const salonSchema = new mongoose.Schema ({
         type:Boolean,
         default:false
     },
+    paymentComplete:{
+        type:Boolean,
+        default:false
+    },
     profileId : {
         type:mongoose.Schema.Types.ObjectId,
         ref:'profile',

@@ -35,13 +35,13 @@ app.use("/api/salon", salonRoute)
 app.use("api/chat", messageRoute)
 
 
-app.get("/success", (req, res) => {
-    res.send("Payment successful");
-  });
+// app.get("/success", (req, res) => {
+//     res.send("Payment successful");
+//   });
   
-  app.get("/failed", (req, res) => {
-    res.send("Payment failed");
-  });
+//   app.get("/failed", (req, res) => {
+//     res.send("Payment failed");
+//   });
 
 
 

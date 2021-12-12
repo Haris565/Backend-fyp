@@ -23,6 +23,8 @@ router.post("/markAsCancelled", auth, salonController.markAsCancelled);
 router.post("/packageHandler", salonController.packageHandler );
 router.post("/activatePackage", salonController.activatePackage);
 router.post("/deactivatePackage", salonController.deactivatePackage)
+router.post("/markPaymentDone", salonController.markPaymentDone)
+
 router.get("/getDashboardData/:profileId" , auth, salonController.getDashboardData)
 
 router.post( 

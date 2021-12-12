@@ -334,8 +334,8 @@ const checkingCheckout=async (req,res)=>{
           // the actual Session ID is returned in the query parameter when your customer
           // is redirected to the success page.
           success_url:
-            "http://localhost:5000/success?session_id={CHECKOUT_SESSION_ID}",
-          cancel_url: "http://localhost:5000/failed",
+            "http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}",
+          cancel_url: "http://localhost:3000/failed",
         });
 
         const checkout = await new Checkout({
@@ -357,6 +357,25 @@ const checkingCheckout=async (req,res)=>{
     // } 
   }
 
+  const markPaymentDone = async (req,res) => {
+      try {
+          let checkoutID = req.body.session_id
+          let UserCheckout = await Checkout.findOne({checkoutID:checkoutID}) 
+          console.log(UserCheckout)
+          if(UserCheckout){
+              let findUser = await Salon.updateOne({_id:UserCheckout.userID}, {$set: {
+                paymentComplete:true
+              }})
+              console.log(findUser)
+              res.status(200).json(findUser)
+          }
+
+      }
+      catch(err){
+          console.log(err)
+          res.status(500).json("server error")
+      }
+  }
 
   const customerPortal = async (req,res)=>{
     if(req.USER.userType === 'company'){
@@ -608,5 +627,6 @@ module.exports={
     getDashboardData,
     packageHandler,
     activatePackage,
-    deactivatePackage
+    deactivatePackage,
+    markPaymentDone
 }
