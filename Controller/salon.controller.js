@@ -243,7 +243,7 @@ const profile = async (req,res)=> {
     if(!errors.isEmpty()){
         return res.status(400).json({errors: errors.array()})
     }
-    console.log(body)
+    console.log("--------------------------------------------",req.body)
     const {name , number , address, location, description, image , time, services} =req.body
     const profileField = {}
     profileField.user=req.user.id
@@ -269,8 +269,11 @@ const profile = async (req,res)=> {
         }
 
         let profile = await Profile.findOne({user: req.user.id})
+        console.log("profile founded")
         if(profile){
-           profileUpdated = await Profile.findOneAndUpdate({user:req.user.id}, {$set: profileField}, {new: true, useFindAndModify: false})
+            console.log("profile founded")
+           profileUpdated = await Profile.updateOne({user:req.user.id}, {$set: profileField}, {new: true, useFindAndModify: false})
+           console.log("updated", profileUpdated)
             return res.json(profileUpdated)
 
         }
