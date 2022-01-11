@@ -12,6 +12,12 @@ const messageRoute = require("./routes/api/message.routes")
 const PORT = process.env.PORT || 5000;
 const app=express()
 const http = require("http").createServer(app);
+const stripe = require("stripe");
+const Stripe = stripe("sk_test_51JVLh7GHsDLdda7ZlaRmaZCC2Uzmn2yXSjDSgUlSwTx7uAUPHfPKNhZ4kY8ntf8iHeGTamUjFpw9gUkANpkm6WgL00wNQ5K8tD", {
+  apiVersion: "2020-08-27",
+});
+const PUBLISHABLE_KEY ="pk_test_51JVLh7GHsDLdda7Zw1h5Qb4UKMOboJVO3klC09CytOh6qBaPAdEiUOIZyunCQKlJmBPdhG47cax8etvHZ5mvRb1O00At4F5Huy"
+const SECRET_KEY="sk_test_51JVLh7GHsDLdda7ZlaRmaZCC2Uzmn2yXSjDSgUlSwTx7uAUPHfPKNhZ4kY8ntf8iHeGTamUjFpw9gUkANpkm6WgL00wNQ5K8tD"
 
 
 // const io = require("socket.io")(http , {
@@ -34,7 +40,23 @@ app.use("/api/user", userRoutes)
 app.use("/api/salon", salonRoute)
 app.use("api/chat", messageRoute)
 
+app.post('/create-payment-intent', async (req, res) => {
+  let {total}= req.body
+  try{
+    const paymentIntent = await Stripe.paymentIntents.create({
+      amount: total,
+      currency: 'usd',
+    });
 
+    res.status(200).json({
+      clientsecret: paymentIntent.client_secret,
+    })
+}
+catch(err){
+    console.log(err)
+    res.status(500).send("Server Error")
+}
+});
 // app.get("/success", (req, res) => {
 //     res.send("Payment successful");
 //   });

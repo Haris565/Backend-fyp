@@ -29,6 +29,8 @@ const stripe = require("stripe");
 const Stripe = stripe("sk_test_51JVLh7GHsDLdda7ZlaRmaZCC2Uzmn2yXSjDSgUlSwTx7uAUPHfPKNhZ4kY8ntf8iHeGTamUjFpw9gUkANpkm6WgL00wNQ5K8tD", {
   apiVersion: "2020-08-27",
 });
+const PUBLISHABLE_KEY ="pk_test_51JVLh7GHsDLdda7Zw1h5Qb4UKMOboJVO3klC09CytOh6qBaPAdEiUOIZyunCQKlJmBPdhG47cax8etvHZ5mvRb1O00At4F5Huy"
+const SECRET_KEY="sk_test_51JVLh7GHsDLdda7ZlaRmaZCC2Uzmn2yXSjDSgUlSwTx7uAUPHfPKNhZ4kY8ntf8iHeGTamUjFpw9gUkANpkm6WgL00wNQ5K8tD"
 
 
 const validateData = (method) => {

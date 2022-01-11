@@ -209,6 +209,8 @@ const booking = async (req,res)=>{
 const userAppointments = async (req,res)=>{
     console.log("user_id",req.user.id)
     try {
+        let appoint = await Appointment.find({customer_id:req.user.id})
+        console.log(appoint)
         let allAppointments = await Appointment.find({customer_id:req.user.id, appointment_date: {$gte: new Date().toISOString()} }).populate('salon_id').populate("customer_id").populate("profile_id")
         let salon_id = allAppointments
         res.json(allAppointments)
